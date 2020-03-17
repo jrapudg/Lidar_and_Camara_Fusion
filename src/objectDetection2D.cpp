@@ -109,7 +109,7 @@ void detectObjects(cv::Mat& img, std::vector<BoundingBox>& bBoxes, float confThr
             height = (*it).roi.height;
             cv::rectangle(visImg, cv::Point(left, top), cv::Point(left+width, top+height),cv::Scalar(0, 255, 0), 2);
             
-            string label = cv::format("%.2f", (*it).confidence);
+            string label = cv::format("%.2f, %i", (*it).confidence, (*it).boxID);
             label = classes[((*it).classID)] + ":" + label;
         
             // Display label at the top of the bounding box

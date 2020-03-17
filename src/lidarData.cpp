@@ -67,7 +67,16 @@ void showLidarTopview(std::vector<LidarPoint> &lidarPoints, cv::Size worldSize, 
         int y = (-xw * imageSize.height / worldSize.height) + imageSize.height;
         int x = (-yw * imageSize.height / worldSize.height) + imageSize.width / 2;
 
-        cv::circle(topviewImg, cv::Point(x, y), 5, cv::Scalar(0, 0, 255), -1);
+        //cv::circle(topviewImg, cv::Point(x, y), 5, cv::Scalar(0, 0, 255), -1);
+        float zw = (*it).z; // world position in m with y facing left from sensor
+        if(zw > -1.40){       
+
+            float val = it->x;
+            float maxVal = worldSize.height;
+            int red = min(255, (int)(255 * abs((val - maxVal) / maxVal)));
+            int green = min(255, (int)(255 * (1 - abs((val - maxVal) / maxVal))));
+            cv::circle(topviewImg, cv::Point(x, y), 5, cv::Scalar(0, green, red), -1);
+        }
     }
 
     // plot distance markers
@@ -114,20 +123,20 @@ void showLidarImgOverlay(cv::Mat &img, std::vector<LidarPoint> &lidarPoints, cv:
     cv::Mat Y(3,1,cv::DataType<double>::type);
     for(auto it=lidarPoints.begin(); it!=lidarPoints.end(); ++it) {
 
-            X.at<double>(0, 0) = it->x;
-            X.at<double>(1, 0) = it->y;
-            X.at<double>(2, 0) = it->z;
-            X.at<double>(3, 0) = 1;
+        X.at<double>(0, 0) = it->x;
+        X.at<double>(1, 0) = it->y;
+        X.at<double>(2, 0) = it->z;
+        X.at<double>(3, 0) = 1;
 
-            Y = P_rect_xx * R_rect_xx * RT * X;
-            cv::Point pt;
-            pt.x = Y.at<double>(0, 0) / Y.at<double>(0, 2);
-            pt.y = Y.at<double>(1, 0) / Y.at<double>(0, 2);
+        Y = P_rect_xx * R_rect_xx * RT * X;
+        cv::Point pt;
+        pt.x = Y.at<double>(0, 0) / Y.at<double>(0, 2);
+        pt.y = Y.at<double>(1, 0) / Y.at<double>(0, 2);
 
-            float val = it->x;
-            int red = min(255, (int)(255 * abs((val - maxVal) / maxVal)));
-            int green = min(255, (int)(255 * (1 - abs((val - maxVal) / maxVal))));
-            cv::circle(overlay, pt, 5, cv::Scalar(0, green, red), -1);
+        float val = it->x;
+        int red = min(255, (int)(255 * abs((val - maxVal) / maxVal)));
+        int green = min(255, (int)(255 * (1 - abs((val - maxVal) / maxVal))));
+        cv::circle(overlay, pt, 5, cv::Scalar(0, green, red), -1);
     }
 
     float opacity = 0.6;
