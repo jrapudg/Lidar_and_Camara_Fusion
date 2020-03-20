@@ -159,7 +159,8 @@ void detKeypointsShiTomasi(vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool b
     }
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
     cout << "Shi-Tomasi detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
-
+    //myfile << str(keypoints.size()) + ",";
+    //myfile << str(1000 * t / 1.0) + ",";
     // visualize results
     if (bVis)
     {
@@ -227,7 +228,8 @@ void detKeypointsHarris(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, bool
 
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
     cout << "Harris detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
-
+    //myfile << str(keypoints.size()) + ",";
+    //myfile << str(1000 * t / 1.0) + ",";
     // visualize results
     if (bVis)
     {
@@ -273,6 +275,8 @@ void detKeypointsModern(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std:
     
     t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
     cout << detectorType << " detection with n=" << keypoints.size() << " keypoints in " << 1000 * t / 1.0 << " ms" << endl;
+    //myfile << str(keypoints.size()) + ",";
+    //myfile << str(1000 * t / 1.0) + ",";
 
     // visualize results
     if (bVis)

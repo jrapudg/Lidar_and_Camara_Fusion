@@ -33,3 +33,14 @@ In this final project, you will implement the missing parts in the schematic. To
 2. Make a build directory in the top level project directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./3D_object_tracking`.
+
+
+## FP.5 : Performance Evaluation 1
+
+One of the problems that identified is when you have outliers in the lidar cloud. It lead to miscalculations on the time to collision. For example, when calculating the pose difference between the closest point to the vehicle in two different frames, and there are outliers, it can lead to even calculate a negative time to collision.
+
+Secondly, I also found problems to match lidar points to objects represented by bounding boxes. Due to the overlaping of bounding boxes it is difficult to match raw lidar points to bounding boxes. One good strategy to deal with this is to cluster data clouds prior to bounding box matching.
+
+## FP.6 : Performance Evaluation 2
+
+The csv files with the comparison of the TTC calculations can be found in build/ folder. The best results were gotten with the sift descriptor (indeed was the only good detector that gives accurate keypoints that can be match through frames) and the brisk and freak.

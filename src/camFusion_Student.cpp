@@ -76,6 +76,7 @@ void clusterLidarWithROI(std::vector<BoundingBox> &boundingBoxes, std::vector<Li
     {
         if (it2->lidarPoints.size() != 0)
         {
+            //myfile << to_string(it2->lidarPoints.size()) + ",";
             cout << "Before filter : " << it2->lidarPoints.size() << endl;
             pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
             for (auto it3 = it2->lidarPoints.begin(); it3 != it2->lidarPoints.end(); ++it3)
@@ -106,8 +107,10 @@ void clusterLidarWithROI(std::vector<BoundingBox> &boundingBoxes, std::vector<Li
                 filtered_point.z = it3->z;
                 it2->lidarPoints.push_back(filtered_point);
             }
-        }
+        //myfile << to_string(it2->lidarPoints.size()) + ",";
         cout << "After filter : " << it2->lidarPoints.size() << endl;
+        }
+        
     }
 }
 
@@ -394,14 +397,14 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
                 max_ocurrence = it2->second;
                 max_id = it2->first;
             }   
-            //cout << "(" <<it1->first<<","<<it2->first<<") = "<<it2->second << endl;
+            cout << "(" <<it1->first<<","<<it2->first<<") = "<<it2->second << endl;
         }
         if (max_ocurrence >= 20)
         {
-            // cout << "Best" << endl;
-            // cout << "(" <<it1->first<<","<<max_id<<") = "<<max_ocurrence<< endl;
+            cout << "Best" << endl;
+            cout << "(" <<it1->first<<","<<max_id<<") = "<<max_ocurrence<< endl;
             bbBestMatches[it1->first] = max_id;
-            //cout << "______" << endl;
+            cout << "______" << endl;
         }
     } 
     // ...

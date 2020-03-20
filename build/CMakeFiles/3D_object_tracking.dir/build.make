@@ -96,18 +96,18 @@ CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/lidarData.cpp -o CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.s
 
-CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o: CMakeFiles/3D_object_tracking.dir/flags.make
-CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o: ../src/matching2D_Student.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o -c /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/matching2D_Student.cpp
+CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o: CMakeFiles/3D_object_tracking.dir/flags.make
+CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o: ../src/matching2D.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o -c /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/matching2D.cpp
 
-CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.i"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/matching2D_Student.cpp > CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.i
+CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/matching2D.cpp > CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.i
 
-CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.s"
-	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/matching2D_Student.cpp -o CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.s
+CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/juanalvarez/Documents/Sensor_Fusion/SFND_3D_Object_Tracking/src/matching2D.cpp -o CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.s
 
 CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.o: CMakeFiles/3D_object_tracking.dir/flags.make
 CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.o: ../src/objectDetection2D.cpp
@@ -127,7 +127,7 @@ CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.s: cmake_force
 "CMakeFiles/3D_object_tracking.dir/src/camFusion_Student.cpp.o" \
 "CMakeFiles/3D_object_tracking.dir/src/FinalProject_Camera.cpp.o" \
 "CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.o" \
-"CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o" \
+"CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o" \
 "CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.o"
 
 # External object files for target 3D_object_tracking
@@ -136,7 +136,7 @@ CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.s: cmake_force
 3D_object_tracking: CMakeFiles/3D_object_tracking.dir/src/camFusion_Student.cpp.o
 3D_object_tracking: CMakeFiles/3D_object_tracking.dir/src/FinalProject_Camera.cpp.o
 3D_object_tracking: CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.o
-3D_object_tracking: CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o
+3D_object_tracking: CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o
 3D_object_tracking: CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.o
 3D_object_tracking: CMakeFiles/3D_object_tracking.dir/build.make
 3D_object_tracking: /Users/juanalvarez/Documents/Sensor_Fusion/installation/OpenCV-master/lib/libopencv_gapi.4.2.0.dylib

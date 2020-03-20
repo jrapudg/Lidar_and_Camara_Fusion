@@ -4,7 +4,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/3D_object_tracking.dir/src/FinalProject_Camera.cpp.o"
   "CMakeFiles/3D_object_tracking.dir/src/camFusion_Student.cpp.o"
   "CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.o"
-  "CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o"
+  "CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o"
   "CMakeFiles/3D_object_tracking.dir/src/objectDetection2D.cpp.o"
 )
 

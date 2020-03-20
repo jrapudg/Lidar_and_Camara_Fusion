@@ -204,32 +204,32 @@ src/lidarData.cpp.s:
 	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/lidarData.cpp.s
 .PHONY : src/lidarData.cpp.s
 
-src/matching2D_Student.o: src/matching2D_Student.cpp.o
+src/matching2D.o: src/matching2D.cpp.o
 
-.PHONY : src/matching2D_Student.o
+.PHONY : src/matching2D.o
 
 # target to build an object file
-src/matching2D_Student.cpp.o:
-	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.o
-.PHONY : src/matching2D_Student.cpp.o
+src/matching2D.cpp.o:
+	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.o
+.PHONY : src/matching2D.cpp.o
 
-src/matching2D_Student.i: src/matching2D_Student.cpp.i
+src/matching2D.i: src/matching2D.cpp.i
 
-.PHONY : src/matching2D_Student.i
+.PHONY : src/matching2D.i
 
 # target to preprocess a source file
-src/matching2D_Student.cpp.i:
-	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.i
-.PHONY : src/matching2D_Student.cpp.i
+src/matching2D.cpp.i:
+	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.i
+.PHONY : src/matching2D.cpp.i
 
-src/matching2D_Student.s: src/matching2D_Student.cpp.s
+src/matching2D.s: src/matching2D.cpp.s
 
-.PHONY : src/matching2D_Student.s
+.PHONY : src/matching2D.s
 
 # target to generate assembly for a file
-src/matching2D_Student.cpp.s:
-	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/matching2D_Student.cpp.s
-.PHONY : src/matching2D_Student.cpp.s
+src/matching2D.cpp.s:
+	$(MAKE) -f CMakeFiles/3D_object_tracking.dir/build.make CMakeFiles/3D_object_tracking.dir/src/matching2D.cpp.s
+.PHONY : src/matching2D.cpp.s
 
 src/objectDetection2D.o: src/objectDetection2D.cpp.o
 
@@ -276,9 +276,9 @@ help:
 	@echo "... src/lidarData.o"
 	@echo "... src/lidarData.i"
 	@echo "... src/lidarData.s"
-	@echo "... src/matching2D_Student.o"
-	@echo "... src/matching2D_Student.i"
-	@echo "... src/matching2D_Student.s"
+	@echo "... src/matching2D.o"
+	@echo "... src/matching2D.i"
+	@echo "... src/matching2D.s"
 	@echo "... src/objectDetection2D.o"
 	@echo "... src/objectDetection2D.i"
 	@echo "... src/objectDetection2D.s"

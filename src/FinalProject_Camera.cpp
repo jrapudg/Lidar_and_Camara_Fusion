@@ -49,6 +49,8 @@ int main(int argc, const char *argv[])
     string lidarPrefix = "KITTI/2011_09_26/velodyne_points/data/000000";
     string lidarFileType = ".bin";
 
+    //double t;
+
     // calibration data for camera and lidar
     cv::Mat P_rect_00(3,4,cv::DataType<double>::type); // 3x4 projection matrix after rectification
     cv::Mat R_rect_00(4,4,cv::DataType<double>::type); // 3x3 rectifying rotation to make image planes co-planar
@@ -74,12 +76,23 @@ int main(int argc, const char *argv[])
     vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
     bool bVis = false;            // visualize results
 
+    //Hyperparameters
+    string detectorType = "SIFT"; //BRISK, SIFT, ORB, FAST, AKAZE, FREAK, HARRIS, SHITOMASI
+    string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+
+    //CSV file
+    std::ofstream myfile;
+    myfile.open ("output_" + detectorType + "-" + descriptorType + ".csv");
+    //myfile << "LIDAR + Camera fusion\n";
+    myfile << "Frame, # Keypoints, # Matches, TTC-camera, TTC-lidar\n";
+
+
     /* MAIN LOOP OVER ALL IMAGES */
 
     for (size_t imgIndex = 0; imgIndex <= imgEndIndex - imgStartIndex; imgIndex+=imgStepWidth)
     {
         /* LOAD IMAGE INTO BUFFER */
-
+        //myfile << to_string(imgIndex) + ",";
         // assemble filenames for current index
         ostringstream imgNumber;
         imgNumber << setfill('0') << setw(imgFillWidth) << imgStartIndex + imgIndex;
@@ -151,7 +164,7 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SIFT";
+        //string detectorType = "SIFT";
 
         if (detectorType.compare("SHITOMASI") == 0)
         {
@@ -188,7 +201,7 @@ int main(int argc, const char *argv[])
         /* EXTRACT KEYPOINT DESCRIPTORS */
 
         cv::Mat descriptors;
-        string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+        //string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
 
         // push descriptors for current frame to end of data buffer
@@ -199,12 +212,14 @@ int main(int argc, const char *argv[])
 
         if (dataBuffer.size() > 1) // wait until at least two images have been processed
         {
+            myfile << to_string(imgIndex) + ",";
+            myfile << to_string(keypoints.size()) + ",";
 
             /* MATCH KEYPOINT DESCRIPTORS */
 
             vector<cv::DMatch> matches;
             string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-            string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
+            string descriptorType = "DES_HOG"; // DES_BINARY, DES_HOG
             string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
 
             matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
@@ -213,7 +228,7 @@ int main(int argc, const char *argv[])
 
             // store matches in current data frame
             (dataBuffer.end() - 1)->kptMatches = matches;
-
+            myfile << to_string(matches.size()) + ",";
             cout << "#7 : MATCH KEYPOINT DESCRIPTORS done" << endl;
             //continue;
             
@@ -235,10 +250,11 @@ int main(int argc, const char *argv[])
 
 
             /* COMPUTE TTC ON OBJECT IN FRONT */
-
+            int count1 = 0;
             // loop over all BB match pairs
             for (auto it1 = (dataBuffer.end() - 1)->bbMatches.begin(); it1 != (dataBuffer.end() - 1)->bbMatches.end(); ++it1)
             {
+                
                 //cout << "A" << endl;
                 // find bounding boxes associates with current match
                 BoundingBox *prevBB, *currBB;
@@ -263,9 +279,9 @@ int main(int argc, const char *argv[])
                 //cout << currBB->boxID << endl;
                 //cout << prevBB->boxID << endl;
 
-                cout << "C lIDAR" << endl;
-                cout << currBB->lidarPoints.size() << endl;
-                cout << prevBB->lidarPoints.size()<< endl;
+                //cout << "C lIDAR" << endl;
+                //cout << currBB->lidarPoints.size() << endl;
+                //cout << prevBB->lidarPoints.size()<< endl;
 
                 if( currBB->lidarPoints.size()>0 && prevBB->lidarPoints.size()>0 ) // only compute TTC if we have Lidar points
                 {
@@ -275,13 +291,14 @@ int main(int argc, const char *argv[])
                     //cout << "D" << endl;
                     computeTTCLidar(prevBB->lidarPoints, currBB->lidarPoints, sensorFrameRate, ttcLidar);
                     //// EOF STUDENT ASSIGNMENT
-
+                    myfile << to_string(ttcLidar) + ",";
                     //// STUDENT ASSIGNMENT
                     //// TASK FP.3 -> assign enclosed keypoint matches to bounding box (implement -> clusterKptMatchesWithROI)
                     //// TASK FP.4 -> compute time-to-collision based on camera (implement -> computeTTCCamera)
                     double ttcCamera;
                     clusterKptMatchesWithROI(*currBB, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->kptMatches);                    
                     computeTTCCamera((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, currBB->kptMatches, sensorFrameRate, ttcCamera);
+                    myfile << to_string(ttcCamera) + "\n";
                     //// EOF STUDENT ASSIGNMENT
                     //cout << "E" << endl;
                     bVis = true;
@@ -304,11 +321,20 @@ int main(int argc, const char *argv[])
                     bVis = false;
 
                 } // eof TTC computation
+                else
+                {
+                    count1 ++;
+                }
+                
             } // eof loop over all BB matches            
-
+            if (count1 == ((dataBuffer.end() - 1)->bbMatches.size()))
+            {
+                myfile << "\n";
+            }
         }
 
     } // eof loop over all images
-
+    
+    myfile.close();
     return 0;
 }

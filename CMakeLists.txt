@@ -24,7 +24,7 @@ link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${OpenCV_DEFINITIONS})
 
 
-add_executable (3D_object_tracking src/camFusion_Student.cpp src/FinalProject_Camera.cpp src/lidarData.cpp src/matching2D_Student.cpp src/objectDetection2D.cpp)
+add_executable (3D_object_tracking src/camFusion_Student.cpp src/FinalProject_Camera.cpp src/lidarData.cpp src/matching2D.cpp src/objectDetection2D.cpp)
 
 target_link_libraries (3D_object_tracking ${OpenCV_LIBRARIES})
 target_link_libraries (3D_object_tracking ${PCL_LIBRARIES})
