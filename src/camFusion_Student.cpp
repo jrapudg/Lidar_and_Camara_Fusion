@@ -185,84 +185,40 @@ void show3DObjects(std::vector<BoundingBox> &boundingBoxes, cv::Size worldSize, 
 // associate a given bounding box with the keypoints it contains
 void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPoint> &kptsCurr, std::vector<cv::DMatch> &kptMatches)
 {
-    vector<cv::DMatch> kptMatches_inter;
-    double meanx = 0;
-    double meany = 0;
-
-    for (auto it1 = kptMatches.begin(); it1 != kptMatches.end(); ++it1)
+    for(auto it = kptMatches.begin(); it != kptMatches.end(); ++it) 
     {
-        cv::Point prev_point, current_point;
-        vector<int> prev_matches, curr_matches;
-        
-
-        prev_point.x = (kptsPrev[it1->trainIdx]).pt.x;
-        prev_point.y = (kptsPrev[it1->trainIdx]).pt.y;
-        current_point.x = (kptsCurr[it1->queryIdx]).pt.x;
-        current_point.y = (kptsCurr[it1->queryIdx]).pt.y;
-
-        if (boundingBox.roi.contains(prev_point) && boundingBox.roi.contains(current_point))
-        {
-            kptMatches_inter.push_back(*it1);
-            meanx += (kptsCurr[it1->queryIdx]).pt.x;
-            meany += (kptsCurr[it1->queryIdx]).pt.y;
+        auto &currentPoint = kptsCurr[it->trainIdx].pt;
+        if (boundingBox.roi.contains(currentPoint)) {
+            boundingBox.kptMatches.push_back(*it);
         }
     }
-    double stdx = 0;
-    double stdy = 0;
-    // double minx = 1000000;
-    // double miny = 1000000;
-    // double maxx = 0;
-    // double maxy = 0;
 
-    // for (auto it1 = kptMatches_inter.begin(); it1 != kptMatches_inter.end(); ++it1)
-    // {
-    //     meanx += (kptsCurr[it1->queryIdx]).pt.x;
-    //     meany += (kptsCurr[it1->queryIdx]).pt.y;
+    double mean = 0;
 
-    //     if ((kptsCurr[it1->queryIdx]).pt.x > maxx)
-    //     {
-    //         maxx = (kptsCurr[it1->queryIdx]).pt.x;
-    //     }
-    //     else if((kptsCurr[it1->queryIdx]).pt.x < minx)
-    //     {
-    //         minx = (kptsCurr[it1->queryIdx]).pt.x;
-    //     }
-
-    //     if ((kptsCurr[it1->queryIdx]).pt.y > maxy)
-    //     {
-    //         maxy = (kptsCurr[it1->queryIdx]).pt.y;
-    //     }
-    //     else if((kptsCurr[it1->queryIdx]).pt.y < miny)
-    //     {
-    //         miny = (kptsCurr[it1->queryIdx]).pt.y;
-    //     }
-    // } 
-
-    meanx = meanx/kptMatches_inter.size();
-    meany = meany/kptMatches_inter.size();
-    
-    for (auto it1 = kptMatches_inter.begin(); it1 != kptMatches_inter.end(); ++it1)
-    {
-        stdx += pow(((kptsCurr[it1->queryIdx]).pt.x - meanx), 2);
-        stdy += pow(((kptsCurr[it1->queryIdx]).pt.y - meany), 2);
-    } 
-    stdx = sqrt(stdx/(kptMatches_inter.size() -1));
-    stdy = sqrt(stdy/(kptMatches_inter.size() -1));
-    
-    //cout << "Mean x : " << meanx << " std x : " << stdx << " Mean y : " << meany << " std y : " << stdy << endl;
-    //cout << "Min x : " << minx << " Max x : " << maxx << " Min y : " << miny << " Max y : " << maxy << endl;
-    for (auto it1 = kptMatches_inter.begin(); it1 != kptMatches_inter.end(); ++it1)
-    {
-        if (((kptsCurr[it1->queryIdx]).pt.x < (meanx + (2 * stdx))) && 
-            ((kptsCurr[it1->queryIdx]).pt.x > (meanx - (2 * stdx))) && 
-            ((kptsCurr[it1->queryIdx]).pt.y < (meanx + (2 * stdy))) &&
-            ((kptsCurr[it1->queryIdx]).pt.y > (meany - (2 * stdy))))
-            {
-                boundingBox.kptMatches.push_back(*it1);
-
-            }
+    for (const auto& it : boundingBox.kptMatches) {
+        cv::KeyPoint currentPoint = kptsCurr.at(it.trainIdx);
+        cv::KeyPoint prevPoint = kptsPrev.at(it.queryIdx);
+        double dist = cv::norm(currentPoint.pt - prevPoint.pt);
+        mean += dist;
     }
-    //boundingBox.kptMatches
+
+    mean = mean / boundingBox.kptMatches.size();
+
+    double ratio = 1.4;
+
+    for (auto it = boundingBox.kptMatches.begin(); it < boundingBox.kptMatches.end();) {
+        cv::KeyPoint currentPoint = kptsCurr.at(it->trainIdx);
+        cv::KeyPoint prevPoint = kptsPrev.at(it->queryIdx);
+        double dist = cv::norm(currentPoint.pt - prevPoint.pt);
+
+        if (dist >= mean * ratio) {
+            boundingBox.kptMatches.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+    
 }
 
 // Compute time-to-collision (TTC) based on keypoint correspondences in successive images
@@ -347,11 +303,7 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
     map<int,map<int,int>> check;
     for (auto it1 = matches.begin(); it1 != matches.end(); ++it1)
     {
-        //cout << it1->trainIdx << " " << it1->queryIdx << endl;
-        //cv::KeyPoint p = prevFrame.keypoints[it1->trainIdx];
-        //cout << p.pt.x;
-        //cout<< "Map" <<check[2][2]+1<< endl;
-        //break;
+
         cv::Point prev_point, current_point;
         vector<int> prev_matches, curr_matches;
         prev_point.x = (prevFrame.keypoints[it1->trainIdx]).pt.x;
