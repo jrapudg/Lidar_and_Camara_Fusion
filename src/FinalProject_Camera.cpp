@@ -72,20 +72,40 @@ int main(int argc, const char *argv[])
 
     // misc
     double sensorFrameRate = 10.0 / imgStepWidth; // frames per second for Lidar and camera
-    int dataBufferSize = 2;       // no. of images which are held in memory (ring buffer) at the same time
+    int dataBufferSize = 2;
+           // no. of images which are held in memory (ring buffer) at the same time
     vector<DataFrame> dataBuffer; // list of data frames which are held in memory at the same time
-    bool bVis = false;            // visualize results
+    
+    // visualize results
+    bool bVis = true;  
+
+    //Viasualization wait
+    bool bWait = true;
+
+    //Save flag
+    bool bSave = false;
+
+    //Crop the vehicle
+    bool bFocusOnVehicle = false;
+
+    //Limit keypoints
+
+    bool bLimitKpts = false;
 
     //Hyperparameters
-    string detectorType = "FAST"; //BRISK, SIFT, ORB, FAST, AKAZE, FREAK, HARRIS, SHITOMASI
-    string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
+    string detectorType = "SIFT"; //BRISK, SIFT, ORB, FAST, AKAZE, HARRIS, SHITOMASI
+    string descriptorType = "BRIEF"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 
     //CSV file
     std::ofstream myfile;
-    myfile.open ("output_" + detectorType + "-" + descriptorType + ".csv");
-    //myfile << "LIDAR + Camera fusion\n";
-    myfile << "Frame, # Keypoints, # Matches, TTC-Lidar, TTC-Camera, TTC-Difference\n";
 
+    if (bSave)
+    {
+        myfile.open ("output_" + detectorType + "-" + descriptorType + ".csv");
+        //myfile << "LIDAR + Camera fusion\n";
+        myfile << "Frame, # Keypoints, # Matches, TTC-Lidar, TTC-Camera, TTC-Difference\n";
+    }
+    
 
     /* MAIN LOOP OVER ALL IMAGES */
 
@@ -98,6 +118,7 @@ int main(int argc, const char *argv[])
         imgNumber << setfill('0') << setw(imgFillWidth) << imgStartIndex + imgIndex;
         string imgFullFilename = imgBasePath + imgPrefix + imgNumber.str() + imgFileType;
 
+        cout << "Frame: " << imgIndex << endl;
         // load image from file 
         cv::Mat img = cv::imread(imgFullFilename);
 
@@ -146,7 +167,7 @@ int main(int argc, const char *argv[])
         bVis = true;
         if(bVis)
         {
-            show3DObjects((dataBuffer.end()-1)->boundingBoxes, cv::Size(4.0, 20.0), cv::Size(2000, 2000), true);
+            show3DObjects((dataBuffer.end()-1)->boundingBoxes, cv::Size(4.0, 20.0), cv::Size(2000, 2000), bWait);
         }
         bVis = false;
 
@@ -178,8 +199,44 @@ int main(int argc, const char *argv[])
         else
             detKeypointsModern(keypoints, imgGray, detectorType, false);
 
+        
+        cv::Rect vehicleRect(535, 180, 180, 150);
+        if (bFocusOnVehicle)
+        {
+            // ...
+            vector<cv::KeyPoint> cropkeypoints;
+            float vx, vx2, vy, vy2;
+            vx = vehicleRect.x;
+            vx2 = vehicleRect.x + vehicleRect.width;
+            vy = vehicleRect.y;
+            vy2 = vehicleRect.y + vehicleRect.height;
+            //cout << keypoints.size() << endl;
+            //cout << " " << vehicleRect.x << " " << vehicleRect.y << " " << vehicleRect.width << " " << vehicleRect.height << endl;
+            for (auto it = keypoints.begin(); it < keypoints.end(); ++it)
+            {   
+                float px, py;
+                cv::Point2f p = it->pt;
+                px = p.x;
+                py = p.y;
+                
+                //cout << "X: " << px <<" " <<vx <<" "<<vx2<< endl << endl;
+                //cout << "Y: " << py <<" " <<vy <<" "<<vy2<< endl << endl;
+
+                if (!( (px < vx) || (px > vx2) || (py < vy) || (py > vy2)))
+                    {
+                    //keypoints.erase(it);
+                    //cout << "TRUE" << endl;
+                    cropkeypoints.push_back(*it);
+                    }
+
+                    //cout << "Point " <<it->pt<< endl;
+            }
+            keypoints = cropkeypoints;
+            cropkeypoints.clear();
+        }
+
         // optional : limit number of keypoints (helpful for debugging and learning)
-        bool bLimitKpts = false;
+        
         if (bLimitKpts)
         {
             int maxKeypoints = 50;
@@ -212,9 +269,11 @@ int main(int argc, const char *argv[])
 
         if (dataBuffer.size() > 1) // wait until at least two images have been processed
         {
-            myfile << to_string(imgIndex) + ",";
-            myfile << to_string(keypoints.size()) + ",";
-
+            if (bSave)
+            {
+                myfile << to_string(imgIndex) + ",";
+                myfile << to_string(keypoints.size()) + ",";
+            }
             /* MATCH KEYPOINT DESCRIPTORS */
 
             vector<cv::DMatch> matches;
@@ -228,7 +287,31 @@ int main(int argc, const char *argv[])
 
             // store matches in current data frame
             (dataBuffer.end() - 1)->kptMatches = matches;
-            myfile << to_string(matches.size()) + ",";
+
+            bVis = true;
+            if (bVis)
+            {
+                cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
+                cv::drawMatches((dataBuffer.end() - 2)->cameraImg, (dataBuffer.end() - 2)->keypoints,
+                                (dataBuffer.end() - 1)->cameraImg, (dataBuffer.end() - 1)->keypoints,
+                                matches, matchImg,
+                                cv::Scalar::all(-1), cv::Scalar::all(-1),
+                                vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+                string windowName = "Matching keypoints between two camera images";
+                cv::namedWindow(windowName, 7);
+                cv::imshow(windowName, matchImg);
+                cout << "Press key to continue to next image" << endl;
+                cv::waitKey(0); // wait for key to be pressed
+            }
+            bVis = false;
+
+            
+            if (bSave)
+            {   
+                myfile << to_string(matches.size()) + ",";
+            }
+
             cout << "#7 : MATCH KEYPOINT DESCRIPTORS done" << endl;
             //continue;
             
@@ -291,15 +374,25 @@ int main(int argc, const char *argv[])
                     //cout << "D" << endl;
                     computeTTCLidar(prevBB->lidarPoints, currBB->lidarPoints, sensorFrameRate, ttcLidar);
                     //// EOF STUDENT ASSIGNMENT
-                    myfile << to_string(ttcLidar) + ",";
+
+                    if (bSave)
+                    {
+                        myfile << to_string(ttcLidar) + ",";
+                    }
+
                     //// STUDENT ASSIGNMENT
                     //// TASK FP.3 -> assign enclosed keypoint matches to bounding box (implement -> clusterKptMatchesWithROI)
                     //// TASK FP.4 -> compute time-to-collision based on camera (implement -> computeTTCCamera)
                     double ttcCamera;
                     clusterKptMatchesWithROI(*currBB, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->kptMatches);                    
                     computeTTCCamera((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, currBB->kptMatches, sensorFrameRate, ttcCamera);
-                    myfile << to_string(ttcCamera) + ",";
-                    myfile << to_string(abs(ttcCamera-ttcLidar)) + "\n";
+                    
+                    if (bSave)
+                    {
+                        myfile << to_string(ttcCamera) + ",";
+                        myfile << to_string(abs(ttcCamera-ttcLidar)) + "\n";
+                    }
+
                     //// EOF STUDENT ASSIGNMENT
                     //cout << "E" << endl;
                     bVis = true;
@@ -316,8 +409,13 @@ int main(int argc, const char *argv[])
                         string windowName = "Final Results : TTC";
                         cv::namedWindow(windowName, 4);
                         cv::imshow(windowName, visImg);
-                        cout << "Press key to continue to next frame" << endl;
-                        cv::waitKey(0);
+                        if (bWait)
+                        {
+                            cout << "Press key to continue to next frame" << endl;
+                            cv::waitKey(0);
+
+                        }
+                        
                     }
                     bVis = false;
 
@@ -330,12 +428,19 @@ int main(int argc, const char *argv[])
             } // eof loop over all BB matches            
             if (count1 == ((dataBuffer.end() - 1)->bbMatches.size()))
             {
-                myfile << "\n";
+                if (bSave)
+                {
+                    myfile << "\n";
+                }
             }
         }
 
     } // eof loop over all images
     
-    myfile.close();
+    if (bSave)
+    {
+        myfile.close();
+    }
+
     return 0;
 }
