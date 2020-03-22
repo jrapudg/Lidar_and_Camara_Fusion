@@ -34,13 +34,150 @@ In this final project, you will implement the missing parts in the schematic. To
 3. Compile: `cmake .. && make`
 4. Run it: `./3D_object_tracking`.
 
+## Lidar outliers removal
+
+The estrategy followed to remove outliers was based in statistical methods. The mean of the lidar cloud is calculated and then, any poitn farthest to one standard deviation will be removed.
+I used the pcl library as follows:
+
+```cpp
+for (vector<BoundingBox>::iterator it2 = boundingBoxes.begin(); it2 != boundingBoxes.end(); ++it2)
+    {
+        if (it2->lidarPoints.size() != 0)
+        {
+            cout << "Before filter : " << it2->lidarPoints.size() << endl;
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+            for (auto it3 = it2->lidarPoints.begin(); it3 != it2->lidarPoints.end(); ++it3)
+            {
+                pcl::PointXYZ point;
+                point.x = it3->x;
+                point.y = it3->y;
+                point.z = it3->z;
+    
+                cloud->push_back(point);
+
+            }
+            pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+            pcl::StatisticalOutlierRemoval<pcl::PointXYZ> sor;
+            sor.setInputCloud (cloud);
+            sor.setMeanK (50);
+            sor.setStddevMulThresh (1.0);
+            sor.filter (*cloud_filtered);
+            
+            it2->lidarPoints.clear();
+            for(auto it3 = cloud_filtered->begin(); it3 != cloud_filtered->end(); ++it3)
+            {
+                LidarPoint filtered_point;
+                filtered_point.x = it3->x;
+                filtered_point.y = it3->y;
+                filtered_point.z = it3->z;
+                it2->lidarPoints.push_back(filtered_point);
+            }
+        cout << "After filter : " << it2->lidarPoints.size() << endl;
+        }
+        
+    }
+```
+
+## Matched Keypoints outliers removal
+
+The strategy for removing outliers from the matched keypoints is as follows:
+* Calculate the mean of distances of keypoints in the current frame to the matched keypoints in the previous frame at each bounding box.
+* Remove the keypoints that are farthest than the mean mulptiplied by a ratio.
+
+This is the code:
+```cpp
+void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint> &kptsPrev, std::vector<cv::KeyPoint> &kptsCurr, std::vector<cv::DMatch> &kptMatches)
+{
+    for(auto it = kptMatches.begin(); it != kptMatches.end(); ++it) 
+    {
+        auto &currentPoint = kptsCurr[it->trainIdx].pt;
+        if (boundingBox.roi.contains(currentPoint)) {
+            boundingBox.kptMatches.push_back(*it);
+        }
+    }
+
+    double mean = 0;
+
+    for (auto it : boundingBox.kptMatches) {
+        cv::KeyPoint currentPoint = kptsCurr.at(it->trainIdx);
+        cv::KeyPoint prevPoint = kptsPrev.at(it->queryIdx);
+        double dist = cv::norm(currentPoint.pt - prevPoint.pt);
+        mean += dist;
+    }
+
+    mean = mean / boundingBox.kptMatches.size();
+
+    double ratio = 1.4;
+
+    for (auto it = boundingBox.kptMatches.begin(); it < boundingBox.kptMatches.end();) {
+        cv::KeyPoint currentPoint = kptsCurr.at(it->trainIdx);
+        cv::KeyPoint prevPoint = kptsPrev.at(it->queryIdx);
+        double dist = cv::norm(currentPoint.pt - prevPoint.pt);
+
+        if (dist >= mean * ratio) {
+            boundingBox.kptMatches.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+    
+}
+
+```
+
 
 ## FP.5 : Performance Evaluation 1
 
-One of the problems that identified is when you have outliers in the lidar cloud. It lead to miscalculations on the time to collision. For example, when calculating the pose difference between the closest point to the vehicle in two different frames, and there are outliers, it can lead to even calculate a negative time to collision.
+One of the problems that identified is when you have outliers in the lidar cloud. It lead to miscalculations on the time to collision. For example, when calculating the pose difference between the closest point to the vehicle in two different frames and one of them have outliers in between the real closest point and the car, it can lead understimate the time to collision. And in the next pair of frames in the buffer, it leads to an overestimation. It can be seen in figure 1, 2 and 3, where TTC is first understimated in frames 5-6 and then overstimated in frame 6-7 due to the presence of outliers in frame 6.
 
-Secondly, I also found problems to match lidar points to objects represented by bounding boxes. Due to the overlaping of bounding boxes it is difficult to match raw lidar points to bounding boxes. One good strategy to deal with this is to cluster data clouds prior to bounding box matching.
+
+|Detector|Descriptor|Frame|TTC-Lidar|TTC-Camera|
+|-|-|-|-|-|
+|BRISK|BRISK|5|12.59|32.02|
+|BRISK|BRISK|6|7.66|16.87|
+|BRISK|BRISK|7|29.06|15.93|
+
+<img src="images/Lidar_frame_5.png" width="779" height="414" />
+Figure 1.
+
+
+<img src="images/Lidar_frame_6.png" width="779" height="414" />
+Figure 2.
+
+
+<img src="images/Lidar_frame_7.png" width="779" height="414" />
+Figure 3.
+
+Secondly, I also found problems to match lidar points to objects  Due to the overlaping of bounding boxes it is difficult to match raw lidar points to bounding boxes. One good strategy to deal with this is to cluster lidar clouds prior to bounding box matching.
 
 ## FP.6 : Performance Evaluation 2
 
-The csv files with the comparison of the TTC calculations can be found in build/ folder. The best results were gotten with the sift descriptor (indeed was the only good detector that gives accurate keypoints that can be match through frames) and the brisk and freak.
+The csv files with the comparison of the TTC calculations can be found in build/ folder. The best results were gotten with the
+AKAZE-BRIEF combination. However, the SIFT keypoint detector and descriptor are present more times in the top ten combinations. 
+
+|Detector|Descriptor|Mean difference among TTC-Camera and TTC-Lidar in seconds|
+|-|-|-|
+|AKAZE|BRIEF|1.347|
+|Shi-Thomasi|SIFT|1.39|
+|SIFT|BRIEF|1.393|
+|SIFT|BRISK|1.418|
+|SIFT|SIFT|1.625|
+|AKAZE|BRISK|1.625|
+|FAST|SIFT|1.643|
+|Shi-Thomasi|BRIEF|1.649|
+|SIFT|FREAK|1.656|
+|AKAZE|AKAZE|1.661|
+|AKAZE|SIFT|1.677|
+|Shi-Thomasi|ORB|1.75|
+|BRISK|FREAK|1.819|
+|FAST|BRIEF|1.84|
+|AKAZE|FREAK|1.853|
+
+<img src="images/Keypoints_13.png" width="779" height="414" />
+Figure 4.
+
+
+|Detector|Descriptor|Frame|TTC-Lidar|TTC-Camera|
+|-|-|-|-|-|
+|HARRIS|BRISK|13|9.22|568.32|
