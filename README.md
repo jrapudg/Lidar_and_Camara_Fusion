@@ -181,3 +181,11 @@ Figure 4.
 |Detector|Descriptor|Frame|TTC-Lidar|TTC-Camera|
 |-|-|-|-|-|
 |HARRIS|BRISK|13|9.22|568.32|
+
+The camera TTC estimation is way off when there are wrong matches of keypoints.
+
+We also have to take into account details in the image are also critical for the calculation. When the objects are occluded, it is difficult to match keypoints. In a similar way, ilumination in the image affects keypoint detection and description.
+
+The TTC can be improve in several ways:
+* Adding a kalman filter for fusion camara and lidar TTC calculation.
+* Clustering lidar points and the match the cluster with bounding boxes.
