@@ -195,16 +195,16 @@ void clusterKptMatchesWithROI(BoundingBox &boundingBox, std::vector<cv::KeyPoint
 
     double mean = 0;
 
-    for (const auto& it : boundingBox.kptMatches) {
-        cv::KeyPoint currentPoint = kptsCurr.at(it.trainIdx);
-        cv::KeyPoint prevPoint = kptsPrev.at(it.queryIdx);
+    for (auto it = boundingBox.kptMatches.begin(); it < boundingBox.kptMatches.end(); ++it) {
+        cv::KeyPoint currentPoint = kptsCurr.at(it->trainIdx);
+        cv::KeyPoint prevPoint = kptsPrev.at(it->queryIdx);
         double dist = cv::norm(currentPoint.pt - prevPoint.pt);
         mean += dist;
     }
 
     mean = mean / boundingBox.kptMatches.size();
 
-    double ratio = 1.4;
+    double ratio = 1;
 
     for (auto it = boundingBox.kptMatches.begin(); it < boundingBox.kptMatches.end();) {
         cv::KeyPoint currentPoint = kptsCurr.at(it->trainIdx);
