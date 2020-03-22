@@ -306,10 +306,10 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
 
         cv::Point prev_point, current_point;
         vector<int> prev_matches, curr_matches;
-        prev_point.x = (prevFrame.keypoints[it1->trainIdx]).pt.x;
-        prev_point.y = (prevFrame.keypoints[it1->trainIdx]).pt.y;
-        current_point.x = (currFrame.keypoints[it1->queryIdx]).pt.x;
-        current_point.y = (currFrame.keypoints[it1->queryIdx]).pt.y;
+        prev_point.x = (prevFrame.keypoints[it1->queryIdx]).pt.x;
+        prev_point.y = (prevFrame.keypoints[it1->queryIdx]).pt.y;
+        current_point.x = (currFrame.keypoints[it1->trainIdx]).pt.x;
+        current_point.y = (currFrame.keypoints[it1->trainIdx]).pt.y;
         
         //cout << "debug 1.1" << endl;
         for (auto it2 = prevFrame.boundingBoxes.begin(); it2 != prevFrame.boundingBoxes.end(); ++it2)
@@ -328,12 +328,19 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
             }
         }
         //cout << "debug 1.3" << endl;
-        if ((prev_matches.size() == 1) && (curr_matches.size() == 1))
-        { 
-            // add Lidar point to bounding box
-            check[curr_matches[0]][prev_matches[0]] += 1;
-        }
+        // if ((prev_matches.size() == 1) && (curr_matches.size() == 1))
+        // { 
+        //     // add Lidar point to bounding box
+        //     check[curr_matches[0]][prev_matches[0]] += 1;
+        // }
        //cout << check.size() << endl; 
+       for(auto it2 = curr_matches.begin(); it2 != curr_matches.end(); ++it2)
+       {
+           for (auto it3 = prev_matches.begin(); it3 != prev_matches.end(); ++it3)
+           {
+               check[*it2][*it3] += 1;
+           }
+       }
     }
 
     for (auto it1 = check.begin(); it1 != check.end(); ++it1)
@@ -349,7 +356,7 @@ void matchBoundingBoxes(std::vector<cv::DMatch> &matches, std::map<int, int> &bb
                 max_ocurrence = it2->second;
                 max_id = it2->first;
             }   
-            cout << "(" <<it1->first<<","<<it2->first<<") = "<<it2->second << endl;
+            //cout << "(" <<it1->first<<","<<it2->first<<") = "<<it2->second << endl;
         }
         if (max_ocurrence >= 20)
         {
