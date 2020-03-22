@@ -77,14 +77,14 @@ int main(int argc, const char *argv[])
     bool bVis = false;            // visualize results
 
     //Hyperparameters
-    string detectorType = "SIFT"; //BRISK, SIFT, ORB, FAST, AKAZE, FREAK, HARRIS, SHITOMASI
+    string detectorType = "FAST"; //BRISK, SIFT, ORB, FAST, AKAZE, FREAK, HARRIS, SHITOMASI
     string descriptorType = "BRISK"; // BRISK, BRIEF, ORB, FREAK, AKAZE, SIFT
 
     //CSV file
     std::ofstream myfile;
     myfile.open ("output_" + detectorType + "-" + descriptorType + ".csv");
     //myfile << "LIDAR + Camera fusion\n";
-    myfile << "Frame, # Keypoints, # Matches, TTC-camera, TTC-lidar\n";
+    myfile << "Frame, # Keypoints, # Matches, TTC-Lidar, TTC-Camera, TTC-Difference\n";
 
 
     /* MAIN LOOP OVER ALL IMAGES */
@@ -298,7 +298,8 @@ int main(int argc, const char *argv[])
                     double ttcCamera;
                     clusterKptMatchesWithROI(*currBB, (dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->kptMatches);                    
                     computeTTCCamera((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints, currBB->kptMatches, sensorFrameRate, ttcCamera);
-                    myfile << to_string(ttcCamera) + "\n";
+                    myfile << to_string(ttcCamera) + ",";
+                    myfile << to_string(abs(ttcCamera-ttcLidar)) + "\n";
                     //// EOF STUDENT ASSIGNMENT
                     //cout << "E" << endl;
                     bVis = true;
